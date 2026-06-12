@@ -1,0 +1,6 @@
+{
+  "name": "Apex Premium Roofing",
+  "description": "Premium commercial and residential roofing contractors serving Australia and the United Kingdom. Emergency support, detailed inspections, restorations, and complete roof replacements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
