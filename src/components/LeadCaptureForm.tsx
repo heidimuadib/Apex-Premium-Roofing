@@ -42,8 +42,9 @@ export default function LeadCaptureForm({
     { value: "inspection", label: "Detailed Moisture & Engineer's Inspection" },
   ];
 
-  const isGhlConfigured = !!(import.meta as any).env.VITE_GOHIGHLEVEL_WEBHOOK_URL;
-  const [ghlStatus, setGhlStatus] = useState<"none" | "success" | "failed">("none");
+  const webhookUrl = (import.meta as any).env.VITE_WEBHOOK_URL || "https://services.leadconnectorhq.com/hooks/PROGa96EoWsnE1H5KxoI/webhook-trigger/b3938bf8-9e01-42fb-a37b-54a19522e1e4";
+  const isWebhookConfigured = !!webhookUrl;
+  const [webhookStatus, setWebhookStatus] = useState<"none" | "success" | "failed">("none");
 
   const handleRegionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const region = e.target.value;
@@ -65,8 +66,8 @@ export default function LeadCaptureForm({
     const generatedId = "APX-" + Math.floor(100000 + Math.random() * 900000);
     setReferenceId(generatedId);
 
-    // If GoHighLevel Webhook url is configured, send the real payload directly!
-    if (isGhlConfigured) {
+    // If Webhook url is configured, send the real payload directly!
+    if (isWebhookConfigured) {
       try {
         const payload = {
           id: generatedId,
@@ -84,7 +85,7 @@ export default function LeadCaptureForm({
           submittedAt: new Date().toISOString(),
         };
 
-        const response = await fetch((import.meta as any).env.VITE_GOHIGHLEVEL_WEBHOOK_URL, {
+        const response = await fetch(webhookUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -94,17 +95,17 @@ export default function LeadCaptureForm({
         });
 
         if (response.ok) {
-          setGhlStatus("success");
+          setWebhookStatus("success");
         } else {
-          console.error("GHL Webhook responded with status:", response.status);
-          setGhlStatus("failed");
+          console.error("Webhook responded with status:", response.status);
+          setWebhookStatus("failed");
         }
       } catch (err) {
-        console.error("Failed to post payload to GHL Webhook:", err);
-        setGhlStatus("failed");
+        console.error("Failed to post payload to Webhook:", err);
+        setWebhookStatus("failed");
       }
     } else {
-      setGhlStatus("none");
+      setWebhookStatus("none");
     }
 
     // Elegant timeout matching our design theme
@@ -142,7 +143,7 @@ export default function LeadCaptureForm({
 
         {/* Integration Status Box */}
         <div className="mb-6 p-4 rounded-xl bg-zinc-950 border border-zinc-900 text-xs text-zinc-400 space-y-2.5">
-          {isGhlConfigured ? (
+          {isWebhookConfigured ? (
             <div className="flex items-start gap-2.5">
               <span className="relative flex h-2.5 w-2.5 mt-1 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -150,26 +151,26 @@ export default function LeadCaptureForm({
               </span>
               <div>
                 <strong className="text-emerald-400 block font-mono uppercase tracking-wider mb-0.5 text-[11px]">
-                  GoHighLevel CRM Router Active
+                  Webhook Integration Active
                 </strong>
-                <span>Lead info was live disptached directly to your GoHighLevel inbound trigger webhook seamlessly.</span>
+                <span>Lead info was live dispatched directly to your inbound trigger webhook seamlessly.</span>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="flex items-start gap-2">
                 <span className="inline-block px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] uppercase font-mono text-amber-500 font-bold">
-                  GHL Lead Automation Available
+                  Lead Automation Available
                 </span>
               </div>
               <p className="text-zinc-500 text-[11px] leading-relaxed">
-                You can capture these submissions automatically into **GoHighLevel (GHL)** without any need for database servers. 
+                You can capture these submissions automatically into your CRM without any need for database servers. 
               </p>
               <div className="bg-zinc-900 p-2 text-[10px] rounded font-mono text-zinc-400 border border-zinc-800 leading-normal">
                 <strong>Setup Steps:</strong><br />
-                1. Inside GHL, create a Automation Workflow triggered by <strong>&quot;Inbound Webhook&quot;</strong>.<br />
-                2. Copy the generated GHL webhook URL.<br />
-                3. Go to the Settings &gt; Secrets menu of the AI panel, and add standard variable: <strong>VITE_GOHIGHLEVEL_WEBHOOK_URL</strong> with your webhook URL.
+                1. Create an Automation Workflow triggered by <strong>&quot;Inbound Webhook&quot;</strong>.<br />
+                2. Copy the generated webhook URL.<br />
+                3. Add a standard variable: <strong>VITE_WEBHOOK_URL</strong> with your webhook URL.
               </div>
             </div>
           )}
